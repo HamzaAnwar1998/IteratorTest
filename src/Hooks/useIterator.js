@@ -3,24 +3,26 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 
 export const useIterator = (url) => {
+  // states
   const [users, updateUsers] = useState([]);
   const [index, updateIndex] = useState(0);
-  const [isLoading, updateIsLoading] = useState(false);
+  const [isLoading, updateIsLoading] = useState(true);
 
+  // fetch one user initially on app start
   useEffect(() => {
     fetchUser();
   }, []);
 
+  // fetch user function
   const fetchUser = () => {
     updateIsLoading(true);
     axios.get(url).then((response) => {
       const { data } = response;
       const { results } = data;
-      const {
-        name: { first, last },
-        picture: { thumbnail },
-        login: { uuid },
-      } = results[0];
+      const { name, login, picture } = results[0];
+      const { first, last } = name;
+      const { uuid } = login;
+      const { thumbnail } = picture;
       updateUsers((prevUsers) => [
         ...prevUsers,
         { id: uuid, name: `${first} ${last}`, picture: thumbnail },
@@ -29,10 +31,12 @@ export const useIterator = (url) => {
     });
   };
 
+  // update index on users array change
   useEffect(() => {
-    updateIndex(users.length - 1);
+    updateIndex(users.length - 1); // 4-1=3
   }, [users]);
 
+  // next
   const next = () => {
     if (index + 1 < users.length) {
       updateIndex(index + 1);
@@ -41,6 +45,7 @@ export const useIterator = (url) => {
     }
   };
 
+  // previous
   const previous = () => {
     let currentIndex = index - 1;
     if (currentIndex < 0) {
@@ -49,5 +54,6 @@ export const useIterator = (url) => {
     updateIndex(currentIndex);
   };
 
+  // return statement
   return [users, users[index], isLoading, next, previous];
 };
